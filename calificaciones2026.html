@@ -1,0 +1,2992 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Gamer Performance Stats</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
+    <style type="text/tailwindcss">
+        :root {
+            --neon-cyan: #00f2ff;
+            --neon-magenta: #ff00ff;
+            --neon-red: #ff4655;
+            --neon-green: #0cf3a9;
+            --neon-orange: #ff9500;
+            --neon-blue: #0080ff;
+            --bg-dark: #0a0e14;
+            --card-bg: rgba(20, 26, 35, 0.8);
+            --accent-border: rgba(0, 242, 255, 0.3);
+        }
+        body {
+            background-color: var(--bg-dark);
+            color: #ffffff;
+            font-family: 'Rajdhani', sans-serif;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(0, 242, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 0% 100%, rgba(255, 70, 85, 0.05) 0%, transparent 40%);
+        }
+        .font-gamer {
+            font-family: 'Orbitron', sans-serif;
+        }
+        .glass-panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--accent-border);
+            clip-path: polygon(0% 0%, 95% 0%, 100% 5%, 100% 100%, 5% 100%, 0% 95%);
+        }
+        .health-bar-container {
+            height: 16px;
+            background: rgba(0, 0, 0, 0.7);
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            border: 2px solid rgba(0, 242, 255, 0.3);
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 10px rgba(0, 242, 255, 0.1);
+        }
+        .health-bar-fill {
+            height: 100%;
+            background: var(--neon-red);
+            width: 50%;
+            border-radius: 6px;
+            position: relative;
+            transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 20px var(--neon-red);
+        }
+        .health-bar-fill::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-red) 0%, #ff6b6b 50%, var(--neon-red) 100%);
+            border-radius: 6px;
+            animation: shimmer 4s ease-in-out infinite;
+        }
+        @keyframes shimmer {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+        .hologram-svg {
+            filter: drop-shadow(0 0 8px var(--neon-cyan));
+        }
+        .nav-active {
+            color: var(--neon-cyan);
+            text-shadow: 0 0 10px var(--neon-cyan);
+        }
+        .btn-gaming {
+            background: transparent;
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+            clip-path: polygon(10% 0%, 100% 0%, 100% 70%, 90% 100%, 0% 100%, 0% 30%);
+        }
+        .btn-gaming:active {
+            background: var(--neon-cyan);
+            color: var(--bg-dark);
+        }
+        .chart-container { 
+            padding: 15px; 
+            height: 350px; 
+            margin-bottom: 50px;
+            background: rgba(0, 242, 255, 0.02);
+            border: 1px solid rgba(0, 242, 255, 0.1);
+            border-radius: 8px;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 640px) {
+            .chart-container { 
+                height: 280px; 
+                margin-bottom: 30px;
+            }
+            .glass-panel {
+                clip-path: none;
+                border-radius: 12px;
+            }
+            .text-6xl {
+                font-size: 3rem !important;
+            }
+            .text-2xl {
+                font-size: 1.25rem !important;
+            }
+            .text-xl {
+                font-size: 1rem !important;
+            }
+            .text-lg {
+                font-size: 0.875rem !important;
+            }
+            .text-xs {
+                font-size: 0.625rem !important;
+            }
+            .gap-x-8 {
+                gap-x: 1rem !important;
+            }
+            .gap-y-4 {
+                gap-y: 0.75rem !important;
+            }
+            .p-6 {
+                padding: 1rem !important;
+            }
+            .px-4 {
+                padding-left: 0.75rem !important;
+                padding-right: 0.75rem !important;
+            }
+            .mb-10 {
+                margin-bottom: 1.5rem !important;
+            }
+            .aspect-square {
+                aspect-ratio: 1/1;
+                max-height: 350px;
+            }
+        }
+        
+        @media (min-width: 641px) and (max-width: 1024px) {
+            .chart-container { 
+                height: 320px; 
+                margin-bottom: 40px;
+            }
+            .text-6xl {
+                font-size: 4rem !important;
+            }
+            .aspect-square {
+                max-height: 400px;
+            }
+        }
+        
+        @media (min-width: 1025px) {
+            .container-desktop {
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+            .chart-container { 
+                height: 400px; 
+                margin-bottom: 60px;
+            }
+            .aspect-square {
+                max-height: 500px;
+            }
+        }
+        
+        /* Mobile Navigation */
+        @media (max-width: 640px) {
+            .mobile-nav {
+                padding: 0.75rem;
+            }
+            .mobile-nav button span {
+                font-size: 1.5rem !important;
+            }
+            .mobile-nav .w-16 {
+                width: 3rem !important;
+                height: 3rem !important;
+            }
+            .mobile-nav .text-4xl {
+                font-size: 2rem !important;
+            }
+        }
+        
+        /* Touch-friendly buttons */
+        @media (max-width: 640px) {
+            .btn-gaming {
+                padding: 0.75rem 1rem;
+                font-size: 0.75rem;
+            }
+            input {
+                padding: 0.75rem !important;
+                font-size: 0.875rem !important;
+            }
+        }
+        
+        /* Optimized grid for mobile */
+        @media (max-width: 640px) {
+            .grid-cols-2 {
+                grid-template-columns: 1fr;
+                gap: 0.75rem !important;
+            }
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+
+        /* Temas Personalizables */
+        .theme-cyberpunk {
+            --neon-cyan: #00f2ff;
+            --neon-magenta: #ff00ff;
+            --neon-red: #ff4655;
+            --neon-green: #0cf3a9;
+            --neon-orange: #ff9500;
+            --neon-blue: #0080ff;
+            --bg-dark: #0a0e14;
+            --card-bg: rgba(20, 26, 35, 0.8);
+            --accent-border: rgba(0, 242, 255, 0.3);
+        }
+
+        .theme-matrix {
+            --neon-cyan: #00ff41;
+            --neon-magenta: #ff0080;
+            --neon-red: #ff0000;
+            --neon-green: #00ff00;
+            --neon-orange: #ff8800;
+            --neon-blue: #0088ff;
+            --bg-dark: #000000;
+            --card-bg: rgba(0, 20, 0, 0.8);
+            --accent-border: rgba(0, 255, 65, 0.3);
+        }
+
+        .theme-neon {
+            --neon-cyan: #ff00ff;
+            --neon-magenta: #00ffff;
+            --neon-red: #ff0066;
+            --neon-green: #00ff00;
+            --neon-orange: #ff9900;
+            --neon-blue: #0099ff;
+            --bg-dark: #1a0033;
+            --card-bg: rgba(51, 0, 51, 0.8);
+            --accent-border: rgba(255, 0, 255, 0.3);
+        }
+
+        .theme-light {
+            --neon-cyan: #0066cc;
+            --neon-magenta: #cc00cc;
+            --neon-red: #cc0000;
+            --neon-green: #00cc00;
+            --neon-orange: #cc6600;
+            --neon-blue: #0066cc;
+            --bg-dark: #f0f0f0;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --accent-border: rgba(0, 102, 204, 0.5);
+            color: #1a1a1a;
+            --text-primary: #000000;
+            --text-secondary: #333333;
+            --text-muted: #666666;
+        }
+
+        /* Partículas Animadas */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--neon-cyan);
+            border-radius: 50%;
+            animation: float 10s infinite ease-in-out;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-100vh) translateX(50px);
+                opacity: 0;
+            }
+        }
+
+        /* Efectos Hover Mejorados */
+        .hover-glow:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 242, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .hover-scale:hover {
+            transform: scale(1.05);
+            transition: transform 0.2s ease;
+        }
+
+        .hover-rotate:hover {
+            transform: rotate(5deg) scale(1.1);
+            transition: transform 0.3s ease;
+        }
+
+        /* Transiciones 3D */
+        .flip-3d {
+            perspective: 1000px;
+        }
+
+        .flip-card {
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+        }
+
+        .flip-card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        /* Insignias y Logros */
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+            margin: 2px;
+            animation: badge-glow 2s ease-in-out infinite;
+        }
+
+        .badge-bronze {
+            background: linear-gradient(135deg, #cd7f32, #b87333);
+            color: white;
+        }
+
+        .badge-silver {
+            background: linear-gradient(135deg, #c0c0c0, #808080);
+            color: black;
+        }
+
+        .badge-gold {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: black;
+        }
+
+        .badge-platinum {
+            background: linear-gradient(135deg, #e5e4e2, #ffffff);
+            color: black;
+        }
+
+        @keyframes badge-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 5px currentColor;
+            }
+
+            50% {
+                box-shadow: 0 0 20px currentColor;
+            }
+        }
+
+        /* Fondos Animados */
+        .bg-animated {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-matrix {
+            background: linear-gradient(to bottom, #000000, #001100);
+            overflow: hidden;
+        }
+
+        .bg-cyberpunk {
+            background: linear-gradient(45deg, #0a0e14, #1a1a2e, #16213e);
+        }
+
+        .bg-neon {
+            background: radial-gradient(circle at 50% 50%, #1a0033, #000000);
+        }
+
+        /* Mejoras de contraste para temas oscuros */
+        body:not(.theme-light) {
+            color: #ffffff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        body:not(.theme-light) .glass-panel {
+            background: var(--card-bg);
+            border: 2px solid var(--accent-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        body:not(.theme-light) input {
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid var(--accent-border);
+            color: #ffffff;
+            font-weight: 500;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        body:not(.theme-light) input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+            font-style: italic;
+        }
+
+        body:not(.theme-light) input:focus {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 0 4px rgba(0, 242, 255, 0.6), 0 0 20px rgba(0, 242, 255, 0.3);
+        }
+
+        body:not(.theme-light) .btn-gaming {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--neon-cyan);
+            border-color: var(--neon-cyan);
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
+            box-shadow: 0 4px 20px rgba(0, 242, 255, 0.4);
+        }
+
+        body:not(.theme-light) .btn-gaming:hover {
+            background: rgba(0, 242, 255, 0.2);
+            color: #ffffff;
+            text-shadow: 0 0 15px rgba(0, 242, 255, 0.7);
+            box-shadow: 0 6px 30px rgba(0, 242, 255, 0.6);
+        }
+
+        body:not(.theme-light) button[onclick^="setParcial"] {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid var(--accent-border);
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+        }
+
+        body:not(.theme-light) button[onclick^="setParcial"]:hover {
+            background: rgba(0, 242, 255, 0.15);
+            border-color: var(--neon-cyan);
+            color: #ffffff;
+            text-shadow: 0 0 8px rgba(0, 242, 255, 0.6);
+        }
+
+        body:not(.theme-light) button[onclick^="setParcial"].active {
+            background: var(--neon-cyan);
+            color: #000000;
+            border-color: var(--neon-cyan);
+            font-weight: 800;
+            text-shadow: 0 0 15px rgba(0, 242, 255, 0.8);
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.6);
+        }
+
+        body:not(.theme-light) .stat-card {
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid var(--accent-border);
+            color: #ffffff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        body:not(.theme-light) .stat-card:hover {
+            background: rgba(0, 242, 255, 0.12);
+            box-shadow: 0 10px 30px rgba(0, 242, 255, 0.3);
+        }
+
+        body:not(.theme-light) .stat-value {
+            color: var(--neon-cyan);
+            text-shadow: 0 0 15px rgba(0, 242, 255, 0.8);
+            font-weight: 800;
+        }
+
+        body:not(.theme-light) .stat-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+        }
+
+        body:not(.theme-light) .ranking-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--accent-border);
+            color: #ffffff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        body:not(.theme-light) .ranking-item:hover {
+            background: rgba(0, 242, 255, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 242, 255, 0.4);
+        }
+
+        body:not(.theme-light) .ranking-position {
+            color: var(--neon-cyan);
+            text-shadow: 0 0 10px rgba(0, 242, 255, 0.8);
+            font-weight: 800;
+        }
+
+        body:not(.theme-light) .ranking-name {
+            color: #ffffff;
+            font-weight: 600;
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+        }
+
+        body:not(.theme-light) .ranking-score {
+            color: var(--neon-green);
+            font-weight: 800;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.6);
+        }
+
+        body:not(.theme-light) .badge {
+            font-weight: 800;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        body:not(.theme-light) .trend-up {
+            color: var(--neon-green);
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.6);
+        }
+
+        body:not(.theme-light) .trend-down {
+            color: var(--neon-red);
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
+        }
+
+        body:not(.theme-light) .trend-stable {
+            color: var(--neon-orange);
+            text-shadow: 0 0 10px rgba(255, 153, 0, 0.6);
+        }
+
+        body.theme-light {
+            color: var(--text-primary);
+        }
+
+        body.theme-light .glass-panel {
+            background: var(--card-bg);
+            border: 2px solid var(--accent-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        }
+
+        body.theme-light input {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid var(--accent-border);
+            color: var(--text-primary);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        body.theme-light input::placeholder {
+            color: var(--text-muted);
+        }
+
+        body.theme-light input:focus {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.3);
+        }
+
+        body.theme-light .btn-gaming {
+            background: var(--neon-cyan);
+            color: white;
+            border-color: var(--neon-cyan);
+            box-shadow: 0 4px 15px rgba(0, 102, 204, 0.4);
+        }
+
+        body.theme-light .btn-gaming:hover {
+            background: var(--neon-blue);
+            border-color: var(--neon-blue);
+            box-shadow: 0 6px 20px rgba(0, 102, 204, 0.5);
+        }
+
+        body.theme-light button[onclick^="setParcial"] {
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid var(--accent-border);
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        body.theme-light button[onclick^="setParcial"]:hover {
+            background: rgba(0, 102, 204, 0.15);
+            border-color: var(--neon-cyan);
+            color: var(--text-primary);
+        }
+
+        body.theme-light button[onclick^="setParcial"].active {
+            background: var(--neon-cyan);
+            color: white;
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 10px rgba(0, 102, 204, 0.4);
+        }
+
+        body.theme-light .theme-toggle-btn {
+            background: var(--card-bg);
+            border: 2px solid var(--accent-border);
+            box-shadow: 0 4px 20px rgba(0, 102, 204, 0.3);
+        }
+
+        body.theme-light .theme-toggle-btn:hover {
+            box-shadow: 0 6px 30px rgba(0, 102, 204, 0.5);
+            background: var(--neon-cyan);
+        }
+
+        body.theme-light .theme-toggle-btn span {
+            color: var(--neon-cyan);
+        }
+
+        body.theme-light .theme-dropdown {
+            background: var(--card-bg);
+            border: 2px solid var(--accent-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        body.theme-light .theme-dropdown-item {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        body.theme-light .theme-dropdown-item:hover {
+            background: rgba(0, 102, 204, 0.15);
+        }
+
+        body.theme-light .sound-toggle {
+            background: var(--card-bg);
+            border: 2px solid var(--accent-border);
+            box-shadow: 0 4px 20px rgba(0, 102, 204, 0.3);
+        }
+
+        body.theme-light .sound-toggle span {
+            color: var(--neon-cyan);
+        }
+
+        body.theme-light .health-bar-container {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid var(--accent-border);
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        body.theme-light .health-bar-fill {
+            background: var(--neon-red);
+            box-shadow: 0 0 20px var(--neon-red);
+        }
+
+        body.theme-light .stat-card {
+            background: rgba(0, 102, 204, 0.1);
+            border: 2px solid var(--accent-border);
+            color: var(--text-primary);
+        }
+
+        body.theme-light .stat-card:hover {
+            box-shadow: 0 10px 25px rgba(0, 102, 204, 0.3);
+        }
+
+        body.theme-light .stat-value {
+            color: var(--neon-cyan);
+            text-shadow: 0 0 10px rgba(0, 102, 204, 0.3);
+        }
+
+        body.theme-light .stat-label {
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        body.theme-light .ranking-item {
+            background: rgba(0, 102, 204, 0.05);
+            border: 1px solid var(--accent-border);
+            color: var(--text-primary);
+        }
+
+        body.theme-light .ranking-item:hover {
+            background: rgba(0, 102, 204, 0.15);
+            box-shadow: 0 4px 15px rgba(0, 102, 204, 0.2);
+        }
+
+        body.theme-light .ranking-position {
+            color: var(--neon-cyan);
+            text-shadow: 0 0 5px rgba(0, 102, 204, 0.3);
+        }
+
+        body.theme-light .ranking-name {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        body.theme-light .ranking-score {
+            color: var(--neon-green);
+            font-weight: 700;
+            text-shadow: 0 0 5px rgba(0, 204, 0, 0.3);
+        }
+
+        body.theme-light .badge {
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        body.theme-light .trend-up {
+            color: var(--neon-green);
+            text-shadow: 0 0 5px rgba(0, 204, 0, 0.3);
+        }
+
+        body.theme-light .trend-down {
+            color: var(--neon-red);
+            text-shadow: 0 0 5px rgba(204, 0, 0, 0.3);
+        }
+
+        body.theme-light .trend-stable {
+            color: var(--neon-orange);
+            text-shadow: 0 0 5px rgba(204, 102, 0, 0.3);
+        }
+
+        /* Selector de Temas Flotante */
+        .theme-selector-float {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .theme-toggle-btn {
+            background: var(--card-bg);
+            border: 2px solid var(--accent-border);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 242, 255, 0.3);
+        }
+
+        .theme-toggle-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 30px rgba(0, 242, 255, 0.5);
+            background: var(--neon-cyan);
+        }
+
+        .theme-toggle-btn:hover span {
+            color: var(--bg-dark);
+        }
+
+        .theme-toggle-btn span {
+            color: var(--neon-cyan);
+            font-size: 24px;
+            transition: color 0.3s ease;
+        }
+
+        .theme-dropdown {
+            position: absolute;
+            top: 60px;
+            right: 0;
+            background: var(--card-bg);
+            border: 2px solid var(--accent-border);
+            border-radius: 12px;
+            min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(12px);
+        }
+
+        .theme-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .theme-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            padding: 12px 16px;
+            background: transparent;
+            border: none;
+            color: white;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .theme-dropdown-item:hover {
+            background: rgba(0, 242, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .theme-dropdown-item:first-child {
+            border-radius: 10px 10px 0 0;
+        }
+
+        .theme-dropdown-item:last-child {
+            border-radius: 0 0 10px 10px;
+        }
+
+        .theme-icon {
+            font-size: 20px;
+            width: 24px;
+            text-align: center;
+        }
+
+        /* Efectos de Sonido */
+        .sound-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: var(--card-bg);
+            border: 1px solid var(--accent-border);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        /* Estadísticas Detalladas */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--accent-border);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 242, 255, 0.2);
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--neon-cyan);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+        }
+
+        /* Comparación Histórica */
+        .trend-indicator {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 10px;
+            font-size: 16px;
+        }
+
+        .trend-up {
+            color: var(--neon-green);
+        }
+
+        .trend-down {
+            color: var(--neon-red);
+        }
+
+        .trend-stable {
+            color: var(--neon-orange);
+        }
+
+        /* Ranking Top 5 */
+        .ranking-list {
+            list-style: none;
+            padding: 0;
+            margin: 15px 0;
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .ranking-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .ranking-position {
+            font-weight: bold;
+            margin-right: 15px;
+            color: var(--neon-cyan);
+            min-width: 30px;
+        }
+
+        .ranking-name {
+            flex: 1;
+            color: white;
+        }
+
+        .ranking-score {
+            font-weight: bold;
+            color: var(--neon-green);
+        }
+
+        /* Animaciones de escaneo y burst */
+        .scan-animation {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+            animation: scan 1.5s ease-in-out;
+        }
+
+        @keyframes scan {
+            0% {
+                left: -100%;
+            }
+
+            50% {
+                left: 100%;
+            }
+
+            100% {
+                left: 100%;
+            }
+        }
+
+        .burst-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--neon-cyan);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: burst 600ms ease-out forwards;
+        }
+
+        @keyframes burst {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(0);
+                opacity: 0;
+            }
+        }
+
+        .alert-risk {
+            background: rgba(255, 70, 85, 0.1);
+            border: 1px solid var(--neon-red);
+            color: var(--neon-red);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            animation: alert-pulse 2s infinite;
+        }
+
+        .alert-improvement {
+            background: rgba(12, 243, 169, 0.1);
+            border: 1px solid var(--neon-green);
+            color: var(--neon-green);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            animation: alert-pulse 2s infinite;
+        }
+
+        @keyframes alert-pulse {
+
+            0%,
+            100% {
+                opacity: 0.8;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        /* Mejoras de animaciones y micro-interacciones */
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-10px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .pulse-once {
+            animation: pulseOnce 0.6s ease-in-out;
+        }
+
+        @keyframes pulseOnce {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .level-up {
+            animation: levelUp 1s ease-in-out;
+        }
+
+        @keyframes levelUp {
+            0% {
+                transform: scale(1) rotate(0deg);
+            }
+
+            50% {
+                transform: scale(1.2) rotate(180deg);
+            }
+
+            100% {
+                transform: scale(1) rotate(360deg);
+            }
+        }
+
+        .connection-error {
+            background: var(--neon-red) !important;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            50%,
+            100% {
+                opacity: 1;
+            }
+
+            25%,
+            75% {
+                opacity: 0.3;
+            }
+        }
+        
+        /* Heat Map Styles */
+        .heatmap-cell {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            font-size: 8px;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .heatmap-cell:hover {
+            transform: scale(1.05);
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(0, 242, 255, 0.3);
+        }
+        
+        .heatmap-strong {
+            background: linear-gradient(135deg, rgba(12, 243, 169, 0.8), rgba(12, 243, 169, 0.4));
+            border: 1px solid var(--neon-green);
+            color: white;
+        }
+        
+        .heatmap-medium {
+            background: linear-gradient(135deg, rgba(255, 149, 0, 0.8), rgba(255, 149, 0, 0.4));
+            border: 1px solid var(--neon-orange);
+            color: white;
+        }
+        
+        .heatmap-weak {
+            background: linear-gradient(135deg, rgba(255, 70, 85, 0.8), rgba(255, 70, 85, 0.4));
+            border: 1px solid var(--neon-red);
+            color: white;
+        }
+        
+        .heatmap-cell::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, transparent, rgba(0, 242, 255, 0.3), transparent);
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .heatmap-cell:hover::before {
+            opacity: 1;
+            animation: rotate 2s linear infinite;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .heatmap-value {
+            font-size: 10px;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+        
+        .heatmap-label {
+            font-size: 6px;
+            opacity: 0.9;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col antialiased theme-cyberpunk">
+    <!-- Selector de Temas Flotante -->
+    <div class="theme-selector-float" id="themeSelector">
+        <button onclick="toggleThemeMenu()" class="theme-toggle-btn">
+            <span class="material-symbols-outlined">palette</span>
+        </button>
+        <div class="theme-dropdown" id="themeDropdown">
+            <button onclick="changeTheme('cyberpunk')" class="theme-dropdown-item">
+                <span class="theme-icon">🎮</span>
+                <span>Cyberpunk</span>
+            </button>
+            <button onclick="changeTheme('matrix')" class="theme-dropdown-item">
+                <span class="theme-icon">💻</span>
+                <span>Matrix</span>
+            </button>
+            <button onclick="changeTheme('neon')" class="theme-dropdown-item">
+                <span class="theme-icon">💡</span>
+                <span>Neon</span>
+            </button>
+            <button onclick="changeTheme('light')" class="theme-dropdown-item">
+                <span class="theme-icon">☀️</span>
+                <span>Claro</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Toggle de Sonido -->
+    <div class="sound-toggle" onclick="toggleSound()">
+        <span id="soundIcon" class="material-symbols-outlined">volume_up</span>
+    </div>
+
+    <!-- Modal Estilizado para Detalles -->
+    <div id="detailModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="glass-panel max-w-sm w-full p-6 transform transition-all duration-300 scale-95 opacity-0" id="modalContent">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="font-gamer text-lg text-[var(--neon-cyan)] font-bold" id="modalTitle">DETALLES</h3>
+                    <button onclick="closeModal()" class="text-white/60 hover:text-white transition-colors">
+                        <span class="material-symbols-outlined text-xl">close</span>
+                    </button>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center p-3 bg-white/5 rounded-lg border border-white/10">
+                        <span class="text-sm text-white/80" id="modalLabel">Área</span>
+                        <span class="text-lg font-bold text-[var(--neon-cyan)]" id="modalValue">0.0</span>
+                    </div>
+                    <div class="p-3 bg-white/5 rounded-lg border border-white/10">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-sm text-white/80">Nivel:</span>
+                            <span class="text-sm font-bold" id="modalLevel">-</span>
+                        </div>
+                        <div class="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                            <div class="h-full transition-all duration-500" id="modalProgress"></div>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-white/5 rounded-lg border border-white/10">
+                        <div class="text-sm text-white/80 mb-1">Descripción</div>
+                        <div class="text-xs text-white/60" id="modalDescription">-</div>
+                    </div>
+                    <div class="p-3 bg-white/5 rounded-lg border border-white/10" id="modalAdviceContainer">
+                        <div class="text-sm text-white/80 mb-1">💡 Sugerencia</div>
+                        <div class="text-xs text-white/60" id="modalAdvice">-</div>
+                    </div>
+                </div>
+                <div class="mt-4 flex gap-2">
+                    <button onclick="closeModal()" class="flex-1 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors text-sm font-gamer">
+                        CERRAR
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Partículas Animadas -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Fondo Animado -->
+    <div class="bg-animated bg-cyberpunk" id="bgAnimated"></div>
+
+    <div class="container-desktop">
+        <header class="p-4 sm:p-6 sticky top-0 z-50 bg-[var(--bg-dark)]/90 backdrop-blur-md">
+            <div class="flex items-center justify-between mb-4 sm:mb-6">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-4 sm:h-6 bg-[var(--neon-cyan)]"></div>
+                    <h2 class="font-gamer text-sm sm:text-lg tracking-widest font-bold">PANEL DE CONTROL</h2>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span id="partialIndicator"
+                        class="inline-block text-[10px] sm:text-xs text-[var(--neon-cyan)] font-gamer tracking-wider bg-white/5 px-3 py-1 rounded-full border border-white/10 transition-all duration-300">📊
+                        Parcial 01 Activo</span>
+                    <span id="connectionStatus" class="inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse"
+                        title="Conectado"></span>
+                </div>
+                <span
+                    class="material-symbols-outlined text-[var(--neon-cyan)] text-xl sm:text-2xl">settings_input_component</span>
+            </div>
+            <div class="space-y-3 sm:space-y-4">
+                <div class="flex gap-1 sm:gap-2 relative">
+                    <button onclick="setParcial('Parcial 1', this)"
+                        class="flex-1 py-1 sm:py-1 text-[10px] sm:text-xs font-gamer border-b-2 border-white/10 transition-all duration-200 hover:border-[var(--neon-cyan)]/30 hover:bg-white/5">PARCIAL
+                        01</button>
+                    <button onclick="setParcial('Parcial 2', this)"
+                        class="flex-1 py-1 sm:py-1 text-[10px] sm:text-xs font-gamer border-b-2 border-white/10 transition-all duration-200 hover:border-[var(--neon-cyan)]/30 hover:bg-white/5">PARCIAL
+                        02</button>
+                    <button onclick="setParcial('Parcial 3', this)"
+                        class="flex-1 py-1 sm:py-1 text-[10px] sm:text-xs font-gamer border-b-2 border-white/10 transition-all duration-200 hover:border-[var(--neon-cyan)]/30 hover:bg-white/5">PARCIAL
+                        03</button>
+                </div>
+                <div class="flex justify-between items-center text-[8px] text-white/50 font-gamer tracking-wider">
+                    <span id="totalAlumnos">Cargando...</span>
+                    <span id="lastUpdate">--:--</span>
+                </div>
+                <div class="relative flex gap-2">
+                    <div class="relative flex-1">
+                        <input id="searchId"
+                            class="w-full bg-white/5 border border-white/10 p-2 sm:p-3 text-xs sm:text-sm font-gamer tracking-wider focus:border-[var(--neon-cyan)] focus:ring-0 outline-none placeholder-white/20 uppercase"
+                            placeholder="BUSCAR ALUMNO" type="text"
+                            onkeypress="if(event.key === 'Enter') { buscar(); }">
+                    </div>
+                    <button onclick="buscar()" class="btn-gaming px-4 sm:px-6 text-[10px] sm:text-xs">BUSCAR</button>
+                </div>
+                <div id="loader" class="loader"
+                    style="display: none; border: 4px solid rgba(0, 242, 255, 0.2); border-top: 4px solid var(--neon-cyan); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 15px auto;">
+                </div>
+            </div>
+        </header>
+        <main class="flex-1 px-2 sm:px-4 pb-20 sm:pb-28 space-y-4 sm:space-y-6 overflow-y-auto">
+            <div id="card-result" class="glass-panel p-4 sm:p-6 relative overflow-hidden" style="display: none;">
+                <div class="absolute top-0 right-0 p-2 opacity-20">
+                    <span class="material-symbols-outlined text-4xl sm:text-6xl">query_stats</span>
+                </div>
+                <div class="flex justify-between items-start mb-3 sm:mb-4">
+                    <div>
+                        <span
+                            class="text-[8px] sm:text-[10px] font-gamer tracking-[0.3em] text-[var(--neon-cyan)] opacity-70">ALUMNO
+                            IDENTIFICADO</span>
+                        <h1 id="res-nombre"
+                            class="font-gamer text-xl sm:text-2xl font-black uppercase tracking-tighter">---</h1>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[8px] sm:text-[10px] font-gamer text-white/40">CLASIFICACIÓN</span>
+                        <div id="res-calif" class="text-[var(--neon-red)] font-gamer text-lg sm:text-xl font-bold">0.0
+                        </div>
+                        <div id="res-rank"
+                            class="text-[8px] sm:text-[10px] text-[var(--neon-cyan)] font-gamer mt-1 opacity-0 transition-opacity duration-500">
+                            Lugar -- de --</div>
+                    </div>
+                </div>
+                <div class="space-y-4 sm:space-y-6">
+                    <div class="flex items-end justify-between">
+                        <div class="flex flex-col">
+                            <span id="res-calif-large"
+                                class="text-4xl sm:text-6xl font-gamer font-black text-white leading-none">0.0</span>
+                            <span id="res-status"
+                                class="text-[var(--neon-red)] text-[10px] sm:text-xs font-bold font-gamer mt-1">RENDIMIENTO
+                                CRÍTICO</span>
+                        </div>
+                        <div class="text-right">
+                            <div id="res-level-badge"
+                                class="inline-block bg-[var(--neon-red)] text-black px-2 py-0.5 text-[8px] sm:text-[10px] font-gamer font-bold mb-1">
+                                NIVEL 0: INSUFICIENTE</div>
+                            <div class="text-[8px] sm:text-[10px] text-white/50 uppercase tracking-widest font-bold">
+                                Índice de Rendimiento</div>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-[8px] sm:text-[10px] font-gamer">
+                            <span class="text-white/40 uppercase">Salud de Rendimiento</span>
+                            <span id="health-percentage" class="text-[var(--neon-red)]">0%</span>
+                        </div>
+                        <div class="health-bar-container">
+                            <div id="health-bar" class="health-bar-fill"></div>
+                        </div>
+                    </div>
+                    <div
+                        class="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-4 sm:gap-y-4 sm:gap-x-8 pt-3 sm:pt-4 border-t border-white/5">
+                        <div>
+                            <p class="text-[8px] sm:text-[10px] font-gamer text-white/30 tracking-widest">APELLIDOS</p>
+                            <p id="res-ap" class="font-bold text-base sm:text-lg leading-tight">---</p>
+                        </div>
+                        <div>
+                            <p class="text-[8px] sm:text-[10px] font-gamer text-white/30 tracking-widest">GRUPO</p>
+                            <p id="res-grupo"
+                                class="font-bold text-base sm:text-lg leading-tight text-[var(--neon-cyan)]">---</p>
+                        </div>
+                        <div>
+                            <p class="text-[8px] sm:text-[10px] font-gamer text-white/30 tracking-widest">MATRÍCULA</p>
+                            <p id="res-id" class="font-bold text-base sm:text-lg leading-tight uppercase">---</p>
+                        </div>
+                        <div>
+                            <p class="text-[8px] sm:text-[10px] font-gamer text-white/30 tracking-widest">EDAD</p>
+                            <p id="res-edad" class="font-bold text-base sm:text-lg leading-tight">---</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="glass-panel p-4 sm:p-6 bg-cyan-900/5">
+                <div class="flex justify-between items-center mb-6 sm:mb-10">
+                    <div class="flex items-center gap-2">
+                        <span
+                            class="material-symbols-outlined text-[var(--neon-cyan)] text-base sm:text-lg">analytics</span>
+                        <h3 class="font-gamer text-[10px] sm:text-xs tracking-widest font-bold">ANÁLISIS DE DESEMPEÑO
+                        </h3>
+                    </div>
+                    <div class="bg-white/5 px-2 py-1 rounded-sm border border-white/10">
+                        <button id="btnPromedio" onclick="togglePromedio()"
+                            class="text-[8px] sm:text-[10px] font-gamer text-white/60">PROMEDIO: DESACTIVADO</button>
+                    </div>
+                </div>
+                <div class="relative w-full aspect-square flex items-center justify-center">
+                    <div class="absolute inset-0 flex items-center justify-center opacity-20">
+                        <div class="w-full h-full border border-[var(--neon-cyan)] rounded-full animate-pulse"></div>
+                        <div class="absolute w-3/4 h-3/4 border border-[var(--neon-cyan)] rounded-full"></div>
+                        <div class="absolute w-1/2 h-1/2 border border-[var(--neon-cyan)] rounded-full"></div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="myChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comparación Histórica -->
+            <div class="glass-panel p-4 sm:p-6">
+                <h3 class="font-gamer text-[10px] sm:text-xs tracking-widest font-bold mb-4">EVOLUCIÓN HISTÓRICA</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-[var(--neon-cyan)]" id="historicoP1">---</div>
+                        <div class="text-xs text-white/60">Parcial 1</div>
+                        <div class="trend-indicator" id="trendP1">-</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-[var(--neon-cyan)]" id="historicoP2">---</div>
+                        <div class="text-xs text-white/60">Parcial 2</div>
+                        <div class="trend-indicator" id="trendP2">-</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-[var(--neon-cyan)]" id="historicoP3">---</div>
+                        <div class="text-xs text-white/60">Parcial 3</div>
+                        <div class="trend-indicator" id="trendP3">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top 5 Ranking -->
+            <div class="glass-panel p-4 sm:p-6">
+                <h3 class="font-gamer text-[10px] sm:text-xs tracking-widest font-bold mb-4">TOP 5 DEL GRUPO</h3>
+                <ul class="ranking-list" id="top5Ranking">
+                    <li class="ranking-item hover-scale">
+                        <span class="ranking-position">1</span>
+                        <span class="ranking-name">Cargando...</span>
+                        <span class="ranking-score">-</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Sistema de Evaluación Simplificado -->
+<div class="glass-panel p-4 sm:p-6">
+<h3 class="font-gamer text-[10px] sm:text-xs tracking-widest font-bold mb-4">MI PROGRESO</h3>
+
+<!-- Roadmap Visual -->
+<div class="mb-4">
+    <div class="flex justify-between items-center mb-2">
+        <span class="text-[8px] text-white/60">CAMINO DE EVALUACIÓN</span>
+        <span id="progressLevel" class="text-[8px] text-[var(--neon-cyan)] font-bold">NIVEL 6.0</span>
+    </div>
+    <div class="flex gap-1">
+        <div id="step1" class="flex-1 h-2 bg-green-500 rounded-l"></div>
+        <div id="step2" class="flex-1 h-2 bg-gray-600"></div>
+        <div id="step3" class="flex-1 h-2 bg-gray-600 rounded-r"></div>
+    </div>
+    <div class="flex justify-between text-[6px] text-white/50 mt-1">
+        <span>Base 6.0</span>
+        <span>+Portafolio 7.0</span>
+        <span>+Reto 8-10</span>
+    </div>
+</div>
+
+<!-- Checklist de Entregas -->
+<div class="mb-4">
+    <div class="text-[8px] text-white/60 mb-2">MIS ENTREGAS</div>
+    <div class="space-y-1" id="deliveryChecklist">
+        <!-- Se generará dinámicamente -->
+    </div>
+</div>
+
+<!-- Potencial de Reto -->
+<div class="p-3 bg-white/5 rounded-lg border border-white/10">
+    <div class="text-[8px] text-white/60 mb-1">POTENCIAL CON RETO FINAL</div>
+    <div class="text-lg font-bold text-[var(--neon-cyan)]" id="potentialRange">8.0 - 8.5</div>
+    <div class="text-[6px] text-white/50" id="potentialMessage">Con tus bases actuales</div>
+</div>
+</div>
+
+<!-- Heat Map de Fortalezas (Rediseñado) -->
+<div class="glass-panel p-4 sm:p-6">
+<h3 class="font-gamer text-[10px] sm:text-xs tracking-widest font-bold mb-4">HEAT MAP DE FORTALEZAS</h3>
+<div class="grid grid-cols-4 gap-2" id="heatmapContainer">
+    <!-- Las celdas del heat map se generarán dinámicamente -->
+</div>
+<div class="mt-3 flex justify-between items-center text-[8px] text-white/50">
+    <span>🔥 Fuerte (>80)</span>
+    <span>🟡 Medio (60-80)</span>
+    <span>🔴 Débil (<60)</span>
+</div>
+</div>
+
+<!-- Alertas Inteligentes -->
+            <div id="alertSection" class="glass-panel p-4 sm:p-6" style="display: none;">
+                <h3 class="font-gamer text-[10px] sm:text-xs tracking-widest font-bold mb-4">ALERTAS DE RENDIMIENTO</h3>
+                <div id="alertsList" class="space-y-2">
+                    <!-- Las alertas se insertarán aquí dinámicamente -->
+                </div>
+            </div>
+
+            <!-- Sistema de Logros -->
+            <div class="glass-panel p-4 sm:p-6">
+                <h3 class="font-gamer text-[10px] sm:text-xs tracking-widest font-bold mb-4">LOGROS DESBLOQUEADOS</h3>
+                <div class="flex flex-wrap gap-2" id="achievements">
+                    <span class="badge badge-bronze">🥉 Primer Paso</span>
+                    <span class="badge badge-silver">📈 Consistente</span>
+                    <span class="badge badge-gold">🏆 Excelencia</span>
+                </div>
+            </div>
+        </main>
+        <div class="fixed top-0 left-0 w-full h-full pointer-events-none opacity-10">
+            <div class="absolute top-1/4 left-4 sm:left-10 w-16 sm:w-24 h-[1px] bg-white"></div>
+            <div class="absolute bottom-1/4 right-4 sm:right-10 w-16 sm:w-24 h-[1px] bg-white"></div>
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-full bg-white/20"></div>
+        </div>
+    </div>
+
+    <script>
+        const URL_API = 'https://script.google.com/macros/s/AKfycbz0KT_VDTPA2g7FJyWGEWXsP1NDy_FHtNGvIsjbCyg3kLVCJhQube0zogDPS0_CgGjP/exec'; // <--- PEGA TU URL AQUÍ
+        let currentParcial = "Parcial 1";
+        let chartInstance = null;
+        let cacheData = null;
+        let mostrarPromedio = false;
+        let promedioGrupo = null;
+        let soundEnabled = true;
+        let currentTheme = 'cyberpunk';
+        let alumnoHistorial = {};
+        let cachePorParcial = {}; // Cache por parcial
+        let particulasFondoCreadas = false;
+        let lastDataUpdate = null;
+        let connectionStatus = 'offline';
+        let partialDataLoaded = {}; // Control de carga lazy
+        let alumnoComentarios = {}; // Comentarios por alumno
+        let riskThresholds = {
+            critical: 5.5,
+            warning: 6.5,
+            improvement: 8.0
+        };
+
+        // Registrar el plugin de datalabels
+        Chart.register(ChartDataLabels);
+
+        // Sistema de Sonidos
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(frequency, duration) {
+            if (!soundEnabled) return;
+
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        function playSuccessSound() {
+            playSound(523.25, 0.1); // C5
+            setTimeout(() => playSound(659.25, 0.1), 100); // E5
+            setTimeout(() => playSound(783.99, 0.15), 200); // G5
+        }
+
+        function playErrorSound() {
+            playSound(220, 0.2); // A3
+            setTimeout(() => playSound(196, 0.2), 100); // G3
+        }
+
+        function playClickSound() {
+            playSound(800, 0.05);
+        }
+
+        function playAlertSound(type) {
+            if (!soundEnabled) return;
+
+            switch (type) {
+                case 'risk':
+                    playSound(150, 0.3); // Sonido grave de advertencia
+                    setTimeout(() => playSound(130, 0.2), 150);
+                    break;
+                case 'improvement':
+                    playSound(440, 0.1); // A4
+                    setTimeout(() => playSound(554.37, 0.1), 100); // C#5
+                    setTimeout(() => playSound(659.25, 0.15), 200); // E5
+                    break;
+                case 'levelup':
+                    playSound(261.63, 0.1); // C4
+                    setTimeout(() => playSound(329.63, 0.1), 100); // E4
+                    setTimeout(() => playSound(392.00, 0.1), 200); // G4
+                    setTimeout(() => playSound(523.25, 0.2), 300); // C5
+                    break;
+                case 'unlock':
+                    playSound(880, 0.05); // A5
+                    setTimeout(() => playSound(1046.50, 0.1), 50); // C6
+                    setTimeout(() => playSound(1318.51, 0.15), 100); // E6
+                    break;
+            }
+        }
+
+        // Sistema de Estado y Conexión
+        function updateConnectionStatus(status) {
+            const statusElement = document.getElementById('connectionStatus');
+            connectionStatus = status;
+
+            switch (status) {
+                case 'online':
+                    statusElement.className = 'inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse';
+                    statusElement.title = 'Conectado';
+                    break;
+                case 'offline':
+                    statusElement.className = 'inline-block w-2 h-2 bg-red-500 rounded-full connection-error';
+                    statusElement.title = 'Desconectado';
+                    break;
+                case 'loading':
+                    statusElement.className = 'inline-block w-2 h-2 bg-yellow-500 rounded-full animate-pulse';
+                    statusElement.title = 'Cargando...';
+                    break;
+            }
+        }
+
+        function updateSystemInfo() {
+            if (!cacheData || !cacheData[currentParcial]) {
+                document.getElementById('totalAlumnos').textContent = 'Sin datos';
+                return;
+            }
+
+            const total = cacheData[currentParcial].length;
+            document.getElementById('totalAlumnos').textContent = `${total} alumnos`;
+
+            if (lastDataUpdate) {
+                const time = new Date(lastDataUpdate).toLocaleTimeString('es-MX', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                document.getElementById('lastUpdate').textContent = `Actualizado: ${time}`;
+            }
+        }
+
+        // Cache persistente en localStorage
+        function saveCacheToStorage() {
+            if (cacheData) {
+                const cacheDataToSave = {
+                    data: cacheData,
+                    timestamp: Date.now(),
+                    version: '1.0'
+                };
+                localStorage.setItem('calificacionesCache', JSON.stringify(cacheDataToSave));
+            }
+        }
+
+        function loadCacheFromStorage() {
+            try {
+                const cached = localStorage.getItem('calificacionesCache');
+                if (cached) {
+                    const parsed = JSON.parse(cached);
+                    const cacheAge = Date.now() - parsed.timestamp;
+                    const maxAge = 5 * 60 * 1000; // 5 minutos
+
+                    if (cacheAge < maxAge && parsed.version === '1.0') {
+                        cacheData = parsed.data;
+                        lastDataUpdate = parsed.timestamp;
+                        updateSystemInfo();
+                        updateConnectionStatus('online');
+                        return true;
+                    }
+                }
+            } catch (e) {
+                console.log('Error cargando cache:', e);
+            }
+            return false;
+        }
+        function toggleThemeMenu() {
+            const dropdown = document.getElementById('themeDropdown');
+            const isShowing = dropdown.classList.contains('show');
+
+            if (isShowing) {
+                dropdown.classList.remove('show');
+            } else {
+                dropdown.classList.add('show');
+            }
+
+            playClickSound();
+        }
+
+        // Cerrar menú al hacer clic fuera
+        document.addEventListener('click', function (event) {
+            const themeSelector = document.getElementById('themeSelector');
+            const dropdown = document.getElementById('themeDropdown');
+
+            if (!themeSelector.contains(event.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        // Sistema de Temas
+        function changeTheme(theme) {
+            document.body.className = document.body.className.replace(/theme-\w+/, `theme-${theme}`);
+            document.getElementById('bgAnimated').className = `bg-animated bg-${theme}`;
+            currentTheme = theme;
+            localStorage.setItem('selectedTheme', theme);
+            playClickSound();
+            createParticles();
+
+            // NO resetear botones de parciales al cambiar tema
+            // Mantener la selección actual del parcial
+        }
+
+        // Toggle de Sonido
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('soundIcon');
+            icon.textContent = soundEnabled ? 'volume_up' : 'volume_off';
+            localStorage.setItem('soundEnabled', soundEnabled);
+            playClickSound();
+        }
+
+        // Sistema de Partículas
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            particlesContainer.innerHTML = '';
+
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+                particlesContainer.appendChild(particle);
+            }
+            particulasFondoCreadas = true;
+        }
+
+        // Efecto burst de partículas al encontrar alumno
+        function createBurstEffect() {
+            const card = document.getElementById('card-result');
+            const rect = card.getBoundingClientRect();
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+
+            for (let i = 0; i < 15; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'burst-particle';
+
+                const angle = (Math.PI * 2 * i) / 15;
+                const distance = 100 + Math.random() * 50;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+
+                particle.style.setProperty('--tx', `${tx}px`);
+                particle.style.setProperty('--ty', `${ty}px`);
+                particle.style.left = `${centerX}px`;
+                particle.style.top = `${centerY}px`;
+
+                card.appendChild(particle);
+
+                setTimeout(() => particle.remove(), 600);
+            }
+        }
+
+        // Animación de escaneo para el panel
+        function addScanAnimation() {
+            const card = document.getElementById('card-result');
+            card.classList.add('scan-animation');
+
+            const scanLine = document.createElement('div');
+            scanLine.className = 'scan-line';
+            card.appendChild(scanLine);
+
+            setTimeout(() => {
+                scanLine.remove();
+                card.classList.remove('scan-animation');
+            }, 1500);
+        }
+
+        // Sistema de Logros mejorado con animaciones
+        function checkAchievements(alumno) {
+            const achievements = document.getElementById('achievements');
+            achievements.innerHTML = '';
+
+            const calif = parseFloat(alumno.CalificacionFinal) || 0;
+            const badges = [];
+            let shouldPlayLevelUp = false;
+
+            // Verificar logros y reproducir sonidos
+            if (calif >= 6) {
+                badges.push('🥉 Primer Paso');
+                if (!alumno.achievements || !alumno.achievements.includes('bronze')) {
+                    playAlertSound('unlock');
+                }
+            }
+            if (calif >= 7) {
+                badges.push('📈 Consistente');
+                if (!alumno.achievements || !alumno.achievements.includes('silver')) {
+                    playAlertSound('unlock');
+                }
+            }
+            if (calif >= 8) {
+                badges.push('🏆 Excelencia');
+                if (!alumno.achievements || !alumno.achievements.includes('gold')) {
+                    playAlertSound('unlock');
+                }
+            }
+            if (calif >= 9) {
+                badges.push('⭐ Legendario');
+                if (!alumno.achievements || !alumno.achievements.includes('platinum')) {
+                    playAlertSound('levelup');
+                    shouldPlayLevelUp = true;
+                }
+            }
+            if (calif === 10) {
+                badges.push('👑 Perfecto');
+                if (!alumno.achievements || !alumno.achievements.includes('perfect')) {
+                    playAlertSound('levelup');
+                    shouldPlayLevelUp = true;
+                }
+            }
+
+            // Mostrar badges con animación
+            badges.forEach((badge, index) => {
+                setTimeout(() => {
+                    const badgeClass = index === 0 ? 'badge-bronze' :
+                        index === 1 ? 'badge-silver' :
+                            index === 2 ? 'badge-gold' :
+                                index === 3 ? 'badge-platinum' : 'badge-gold';
+                    const span = document.createElement('span');
+                    span.className = `badge ${badgeClass} slide-in`;
+                    span.textContent = badge;
+
+                    // Efecto especial para logros nuevos
+                    if (shouldPlayLevelUp && index >= badges.length - 1) {
+                        span.classList.add('level-up');
+                    }
+
+                    achievements.appendChild(span);
+                }, index * 150);
+            });
+
+            // Guardar logros del alumno
+            alumno.achievements = badges;
+        }
+
+        // Sistema de Alertas Tempranas Predictivas
+    function generateEarlyWarnings(alumnoId) {
+        if (!cacheData) return;
+        
+        const warnings = [];
+        const parciales = ['Parcial 1', 'Parcial 2', 'Parcial 3'];
+        const historial = {};
+        
+        // Obtener historial completo del alumno
+        parciales.forEach((parcial, index) => {
+            const lista = cacheData[parcial];
+            const alumno = lista.find(a => String(a.ID) === alumnoId);
+            if (alumno) {
+                historial[parcial] = {
+                    calificacion: parseFloat(alumno.CalificacionFinal) || 0,
+                    detalles: {
+                        juego1: alumno.Juego1 * 10,
+                        juego2: alumno.Juego2 * 10,
+                        juego3: alumno.Juego3 * 10,
+                        serie1: alumno.Serie1 * 10,
+                        serie2: alumno.Serie2 * 10,
+                        serie3: alumno.Serie3 * 10,
+                        portfolio: alumno.Portfolio,
+                        reto: alumno.RetoFinal / 10
+                    }
+                };
+            }
+        });
+        
+        const valores = Object.values(historial).map(h => h.calificacion).filter(v => v > 0);
+        
+        // Análisis predictivo de tendencia
+        if (valores.length >= 2) {
+            const tendencia = calcularTendencia(valores);
+            const ultimoValor = valores[valores.length - 1];
+            
+            // Predicción para siguiente parcial
+            const prediccion = ultimoValor + tendencia;
+            
+            // Alertas tempranas basadas en predicción
+            if (prediccion < riskThresholds.critical) {
+                warnings.push({
+                    type: 'critical',
+                    message: `🚨 RIESGO CRÍTICO: Tendencia sugiere ${prediccion.toFixed(1)} en siguiente parcial`,
+                    action: 'Intervención inmediata requerida',
+                    sound: 'risk'
+                });
+            } else if (prediccion < riskThresholds.warning) {
+                warnings.push({
+                    type: 'warning',
+                    message: `⚠️ ALERTA TEMPRANA: Posible baja a ${prediccion.toFixed(1)} puntos`,
+                    action: 'Recomendable tutoría',
+                    sound: 'risk'
+                });
+            } else if (tendencia > 0.5 && prediccion > riskThresholds.improvement) {
+                warnings.push({
+                    type: 'opportunity',
+                    message: `🎯 OPORTUNIDAD: Tendencia ascendente hacia ${prediccion.toFixed(1)} puntos`,
+                    action: 'Potencial de excelencia',
+                    sound: 'improvement'
+                });
+            }
+        }
+        
+        // Detección de áreas críticas específicas
+        if (Object.keys(historial).length > 0) {
+            const ultimoParcial = historial[Object.keys(historial).pop()];
+            const areasCriticas = [];
+            
+            Object.entries(ultimoParcial.detalles).forEach(([area, valor]) => {
+                if (valor < 60) {
+                    areasCriticas.push(area);
+                }
+            });
+            
+            if (areasCriticas.length > 0) {
+                warnings.push({
+                    type: 'areas',
+                    message: `📊 Áreas críticas detectadas: ${areasCriticas.join(', ')}`,
+                    action: 'Enfoque específico requerido',
+                    sound: 'risk'
+                });
+            }
+        }
+        
+        return warnings;
+    }
+    
+    function calcularTendencia(valores) {
+        if (valores.length < 2) return 0;
+        
+        // Cálculo de tendencia lineal simple
+        let sumaX = 0, sumaY = 0, sumaXY = 0, sumaX2 = 0;
+        const n = valores.length;
+        
+        for (let i = 0; i < n; i++) {
+            sumaX += i;
+            sumaY += valores[i];
+            sumaXY += i * valores[i];
+            sumaX2 += i * i;
+        }
+        
+        const tendencia = (n * sumaXY - sumaX * sumaY) / (n * sumaX2 - sumaX * sumaX);
+        return tendencia;
+    }
+    // Heat Map de Fortalezas (Solo Series y Juegos - las bases)
+    function generateHeatMap(alumno) {
+        const container = document.getElementById('heatmapContainer');
+        container.innerHTML = '';
+        
+        // Solo mostrar Series y Juegos (las bases para 6.0)
+        const bases = [
+            { key: 'juego1', label: 'J1', value: alumno.Juego1 * 10 },
+            { key: 'serie1', label: 'S1', value: alumno.Serie1 * 10 },
+            { key: 'juego2', label: 'J2', value: alumno.Juego2 * 10 },
+            { key: 'serie2', label: 'S2', value: alumno.Serie2 * 10 },
+            { key: 'juego3', label: 'J3', value: alumno.Juego3 * 10 },
+            { key: 'serie3', label: 'S3', value: alumno.Serie3 * 10 }
+        ];
+        
+        bases.forEach((base, index) => {
+            const cell = document.createElement('div');
+            
+            // Determinar clase según valor
+            let cssClass = '';
+            if (base.value >= 80) {
+                cssClass = 'heatmap-strong';
+            } else if (base.value >= 60) {
+                cssClass = 'heatmap-medium';
+            } else {
+                cssClass = 'heatmap-weak';
+            }
+            
+            cell.className = `heatmap-cell ${cssClass} slide-in`;
+            cell.style.animationDelay = `${index * 100}ms`;
+            
+            cell.innerHTML = `
+                <div class="heatmap-value">${base.value.toFixed(0)}</div>
+                <div class="heatmap-label">${base.label}</div>
+            `;
+            
+            // Tooltip mejorado
+            cell.title = `${base.label}: ${base.value.toFixed(1)} puntos - Base para 6.0`;
+            
+            // Evento click
+            cell.addEventListener('click', function() {
+                playClickSound();
+                showBaseDetails(base);
+            });
+            
+            container.appendChild(cell);
+        });
+    }
+    
+    function showBaseDetails(base) {
+        const messages = {
+            'juego1': 'Primer juego práctico - Base fundamental',
+            'serie1': 'Primera serie de ejercicios - Base fundamental',
+            'juego2': 'Segundo juego práctico - Base fundamental',
+            'serie2': 'Segunda serie de ejercicios - Base fundamental',
+            'juego3': 'Tercer juego práctico - Base fundamental',
+            'serie3': 'Tercera serie de ejercicios - Base fundamental'
+        };
+        
+        // Determinar nivel y colores
+        let level, levelColor, progressColor, advice;
+        if (base.value >= 80) {
+            level = '🔥 ¡Excelente!';
+            levelColor = 'text-green-400';
+            progressColor = 'bg-green-500';
+            advice = '¡Dominio excepcional! Sigue así.';
+        } else if (base.value >= 60) {
+            level = '🟡 Bien';
+            levelColor = 'text-yellow-400';
+            progressColor = 'bg-yellow-500';
+            advice = 'Buen trabajo. Pequeños ajustes pueden llevarte a la excelencia.';
+        } else {
+            level = '🔴 A mejorar';
+            levelColor = 'text-red-400';
+            progressColor = 'bg-red-500';
+            advice = 'Enfócate aquí para asegurar tu base de 6.0. ¡Tú puedes!';
+        }
+        
+        // Llenar el modal
+        document.getElementById('modalTitle').textContent = `${base.label.toUpperCase()} - DETALLES`;
+        document.getElementById('modalLabel').textContent = base.label;
+        document.getElementById('modalValue').textContent = `${base.value.toFixed(1)} pts`;
+        document.getElementById('modalLevel').textContent = level;
+        document.getElementById('modalLevel').className = `text-sm font-bold ${levelColor}`;
+        document.getElementById('modalDescription').textContent = messages[base.key];
+        document.getElementById('modalAdvice').textContent = advice;
+        
+        // Actualizar barra de progreso
+        const progressBar = document.getElementById('modalProgress');
+        progressBar.className = `h-full transition-all duration-500 ${progressColor}`;
+        progressBar.style.width = `${Math.min(100, base.value)}%`;
+        
+        // Mostrar modal con animación
+        const modal = document.getElementById('detailModal');
+        const modalContent = document.getElementById('modalContent');
+        modal.classList.remove('hidden');
+        
+        setTimeout(() => {
+            modalContent.classList.remove('scale-95', 'opacity-0');
+            modalContent.classList.add('scale-100', 'opacity-100');
+        }, 10);
+        
+        playClickSound();
+    }
+    
+    function closeModal() {
+        const modal = document.getElementById('detailModal');
+        const modalContent = document.getElementById('modalContent');
+        
+        modalContent.classList.remove('scale-100', 'opacity-100');
+        modalContent.classList.add('scale-95', 'opacity-0');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+        
+        playClickSound();
+    }
+    
+    // Cerrar modal al hacer clic fuera
+    document.getElementById('detailModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+    
+    // Cerrar modal con Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('detailModal');
+            if (!modal.classList.contains('hidden')) {
+                closeModal();
+            }
+        }
+    });
+    
+    // Sistema de Evaluación Centrado en el Alumno
+    function generateStudentProgress(alumno) {
+        // Actualizar roadmap visual
+        updateProgressRoadmap(alumno);
+        
+        // Generar checklist de entregas
+        generateDeliveryChecklist(alumno);
+        
+        // Calcular potencial con Reto Final
+        calculatePotential(alumno);
+    }
+    
+    function updateProgressRoadmap(alumno) {
+        const calif = parseFloat(alumno.CalificacionFinal) || 0;
+        const progressLevel = document.getElementById('progressLevel');
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        const step3 = document.getElementById('step3');
+        
+        // Determinar nivel actual
+        let level = '';
+        if (calif >= 6.0) {
+            step1.className = 'flex-1 h-2 bg-green-500 rounded-l';
+            level = 'NIVEL 6.0';
+        } else {
+            step1.className = 'flex-1 h-2 bg-gray-600 rounded-l';
+            level = 'EN CAMINO A 6.0';
+        }
+        
+        if (calif >= 7.0) {
+            step2.className = 'flex-1 h-2 bg-yellow-500';
+            level = 'NIVEL 7.0';
+        } else {
+            step2.className = 'flex-1 h-2 bg-gray-600';
+        }
+        
+        if (calif >= 8.0) {
+            step3.className = 'flex-1 h-2 bg-blue-500 rounded-r';
+            level = `NIVEL ${calif.toFixed(1)}`;
+        } else {
+            step3.className = 'flex-1 h-2 bg-gray-600 rounded-r';
+        }
+        
+        progressLevel.textContent = level;
+    }
+    
+    function generateDeliveryChecklist(alumno) {
+        const checklist = document.getElementById('deliveryChecklist');
+        checklist.innerHTML = '';
+        
+        // Base: Series y Juegos
+        const bases = [
+            { key: 'juego1', label: 'Juego 1', value: alumno.Juego1 * 10, delivered: alumno.Juego1 > 0 },
+            { key: 'serie1', label: 'Serie 1', value: alumno.Serie1 * 10, delivered: alumno.Serie1 > 0 },
+            { key: 'juego2', label: 'Juego 2', value: alumno.Juego2 * 10, delivered: alumno.Juego2 > 0 },
+            { key: 'serie2', label: 'Serie 2', value: alumno.Serie2 * 10, delivered: alumno.Serie2 > 0 },
+            { key: 'juego3', label: 'Juego 3', value: alumno.Juego3 * 10, delivered: alumno.Juego3 > 0 },
+            { key: 'serie3', label: 'Serie 3', value: alumno.Serie3 * 10, delivered: alumno.Serie3 > 0 }
+        ];
+        
+        bases.forEach(base => {
+            const item = document.createElement('div');
+            item.className = 'flex justify-between items-center p-2 rounded text-[8px] slide-in';
+            
+            if (base.delivered) {
+                item.className += ' bg-green-500/20 text-green-400';
+                item.innerHTML = `
+                    <span>✅ ${base.label}</span>
+                    <span>${base.value.toFixed(1)}</span>
+                `;
+            } else {
+                item.className += ' bg-red-500/20 text-red-400';
+                item.innerHTML = `
+                    <span>📝 ${base.label}</span>
+                    <span>Pendiente (+1.0)</span>
+                `;
+            }
+            
+            checklist.appendChild(item);
+        });
+        
+        // Portafolio
+        const portfolioItem = document.createElement('div');
+        const hasPortfolio = alumno.Portfolio > 0;
+        portfolioItem.className = `flex justify-between items-center p-2 rounded text-[8px] slide-in ${hasPortfolio ? 'bg-yellow-500/20 text-yellow-400' : 'bg-gray-600/20 text-gray-400'}`;
+        portfolioItem.innerHTML = `
+            <span>${hasPortfolio ? '✅' : '📁'} Portafolio</span>
+            <span>${hasPortfolio ? alumno.Portfolio.toFixed(1) : 'Opcional (+1.0)'}</span>
+        `;
+        checklist.appendChild(portfolioItem);
+        
+        // Reto Final
+        const retoItem = document.createElement('div');
+        const hasReto = alumno.RetoFinal > 0;
+        retoItem.className = `flex justify-between items-center p-2 rounded text-[8px] slide-in ${hasReto ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-600/20 text-purple-400'}`;
+        retoItem.innerHTML = `
+            <span>${hasReto ? '🏆' : '🎯'} Reto Final</span>
+            <span>${hasReto ? (alumno.RetoFinal / 10).toFixed(1) : 'Potencial 8-10'}</span>
+        `;
+        checklist.appendChild(retoItem);
+    }
+    
+    function calculatePotential(alumno) {
+        const potentialRange = document.getElementById('potentialRange');
+        const potentialMessage = document.getElementById('potentialMessage');
+        
+        // Calcular base (promedio de series y juegos)
+        const bases = [
+            alumno.Juego1 * 10,
+            alumno.Serie1 * 10,
+            alumno.Juego2 * 10,
+            alumno.Serie2 * 10,
+            alumno.Juego3 * 10,
+            alumno.Serie3 * 10
+        ].filter(v => v > 0);
+        
+        if (bases.length === 0) {
+            potentialRange.textContent = '6.0 - 6.0';
+            potentialMessage.textContent = 'Entrega tus bases primero';
+            return;
+        }
+        
+        const baseAvg = bases.reduce((a, b) => a + b, 0) / bases.length;
+        
+        // Calcular potencial con Reto Final
+        let minPotential = baseAvg;
+        let maxPotential = Math.min(10, baseAvg + 3); // Máximo +3 puntos con reto excelente
+        
+        // Si tiene portafolio, ajustar
+        if (alumno.Portfolio > 0) {
+            minPotential = Math.max(minPotential, 7.0);
+        }
+        
+        potentialRange.textContent = `${minPotential.toFixed(1)} - ${maxPotential.toFixed(1)}`;
+        
+        // Mensaje motivacional
+        if (baseAvg >= 8) {
+            potentialMessage.textContent = '¡Excelentes bases! Puedes alcanzar 9-10';
+        } else if (baseAvg >= 7) {
+            potentialMessage.textContent = '¡Buen trabajo! En el reto puedes llegar a 8-9';
+        } else if (baseAvg >= 6) {
+            potentialMessage.textContent = 'Base completa. Enfócate en el reto para 8+';
+        } else {
+            potentialMessage.textContent = 'Mejora tus bases para mayor potencial';
+        }
+    }
+    
+    // Función para mostrar alertas tempranas
+    function displayEarlyWarnings(warnings) {
+        const alertSection = document.getElementById('alertSection');
+        const alertsList = document.getElementById('alertsList');
+        
+        // Agregar warnings a las alertas existentes
+        warnings.forEach((warning, index) => {
+            setTimeout(() => {
+                const div = document.createElement('div');
+                
+                let cssClass = '';
+                switch(warning.type) {
+                    case 'critical':
+                        cssClass = 'alert-risk';
+                        break;
+                    case 'warning':
+                        cssClass = 'alert-risk';
+                        break;
+                    case 'opportunity':
+                        cssClass = 'alert-improvement';
+                        break;
+                    case 'areas':
+                        cssClass = 'alert-risk';
+                        break;
+                }
+                
+                div.className = `${cssClass} slide-in`;
+                div.innerHTML = `
+                    <div>${warning.message}</div>
+                    <div style="font-size: 8px; opacity: 0.8; margin-top: 2px;">${warning.action}</div>
+                `;
+                
+                alertsList.appendChild(div);
+                
+                // Reproducir sonido específico
+                if (warning.sound) {
+                    playAlertSound(warning.sound);
+                }
+            }, index * 300);
+        });
+        
+        // Asegurar que la sección esté visible
+        alertSection.style.display = 'block';
+        alertSection.classList.add('slide-in');
+        
+        setTimeout(() => {
+            alertSection.classList.remove('slide-in');
+        }, 500);
+    }
+    
+    function generateAlerts(alumnoId) {
+        if (!cacheData) return;
+
+        const alerts = [];
+        const parciales = ['Parcial 1', 'Parcial 2', 'Parcial 3'];
+        const historial = {};
+
+        // Obtener historial del alumno
+        parciales.forEach((parcial, index) => {
+            const lista = cacheData[parcial];
+            const alumno = lista.find(a => String(a.ID) === alumnoId);
+            if (alumno) {
+                historial[parcial] = parseFloat(alumno.CalificacionFinal) || 0;
+            }
+        });
+
+            // Analizar tendencias y generar alertas
+            const valores = Object.values(historial).filter(v => v > 0);
+            let hasRisk = false;
+            let hasImprovement = false;
+
+            for (let i = 1; i < valores.length; i++) {
+                const diff = valores[i] - valores[i - 1];
+                if (diff > 1) {
+                    alerts.push({
+                        type: 'improvement',
+                        message: `🎯 ¡Excelente progreso! Mejoraste +${diff.toFixed(1)} puntos en Parcial ${i+1}`,
+                        sound: 'improvement'
+                    });
+                    hasImprovement = true;
+                } else if (diff < -1) {
+                    alerts.push({
+                        type: 'opportunity',
+                        message: `💪 Oportunidad de mejora en Parcial ${i+1} (+${Math.abs(diff).toFixed(1)} posibles)`,
+                        sound: 'improvement'
+                    });
+                }
+            }
+
+            // Reproducir sonidos de alerta
+            if (hasRisk) playAlertSound('risk');
+            if (hasImprovement && !hasRisk) playAlertSound('improvement');
+
+            // Mostrar alertas con animación
+            const alertSection = document.getElementById('alertSection');
+            const alertsList = document.getElementById('alertsList');
+
+            if (alerts.length > 0) {
+                alertSection.style.display = 'block';
+                alertSection.classList.add('slide-in');
+                alertsList.innerHTML = '';
+
+                alerts.forEach((alert, index) => {
+                    setTimeout(() => {
+                        const div = document.createElement('div');
+                        div.className = `alert-${alert.type} slide-in`;
+                        div.textContent = alert.message;
+                        alertsList.appendChild(div);
+                    }, index * 200);
+                });
+
+                setTimeout(() => {
+                    alertSection.classList.remove('slide-in');
+                }, 500);
+            } else {
+                alertSection.style.display = 'none';
+            }
+        }
+
+        // Calcular posición en el grupo
+        function calculateRank(alumnoId, listaParcial) {
+            if (!listaParcial || listaParcial.length === 0) return null;
+
+            const sorted = [...listaParcial].sort((a, b) =>
+                parseFloat(b.CalificacionFinal) - parseFloat(a.CalificacionFinal)
+            );
+
+            const rank = sorted.findIndex(a => String(a.ID) === alumnoId) + 1;
+            const total = sorted.length;
+
+            return { rank, total };
+        }
+        function updateHistoricalData(alumnoId) {
+            if (!cacheData) return;
+
+            const parciales = ['Parcial 1', 'Parcial 2', 'Parcial 3'];
+            const historial = {};
+
+            parciales.forEach((parcial, index) => {
+                const lista = cacheData[parcial];
+                const alumno = lista.find(a => String(a.ID) === alumnoId);
+                if (alumno) {
+                    historial[parcial] = parseFloat(alumno.CalificacionFinal) || 0;
+
+                    // Actualizar UI
+                    document.getElementById(`historicoP${index + 1}`).textContent = historial[parcial].toFixed(1);
+
+                    // Calcular tendencia
+                    if (index > 0) {
+                        const anterior = historial[parciales[index - 1]];
+                        const actual = historial[parcial];
+                        const trendElement = document.getElementById(`trendP${index + 1}`);
+
+                        if (actual > anterior) {
+                            trendElement.innerHTML = '↑';
+                            trendElement.className = 'trend-indicator trend-up';
+                        } else if (actual < anterior) {
+                            trendElement.innerHTML = '↓';
+                            trendElement.className = 'trend-indicator trend-down';
+                        } else {
+                            trendElement.innerHTML = '→';
+                            trendElement.className = 'trend-indicator trend-stable';
+                        }
+                    }
+                }
+            });
+
+            alumnoHistorial[alumnoId] = historial;
+        }
+
+        // Top 5 Ranking con cache
+        function updateTop5Ranking(listaParcial) {
+            if (!listaParcial || listaParcial.length === 0) return;
+
+            // Verificar si ya está en cache
+            const cacheKey = currentParcial;
+            if (cachePorParcial[cacheKey] && cachePorParcial[cacheKey].top5) {
+                renderTop5(cachePorParcial[cacheKey].top5);
+                return;
+            }
+
+            const top5 = listaParcial
+                .map(a => ({
+                    nombre: a["Nombre o nombres"],
+                    calificacion: parseFloat(a.CalificacionFinal) || 0
+                }))
+                .sort((a, b) => b.calificacion - a.calificacion)
+                .slice(0, 5);
+
+            // Guardar en cache
+            if (!cachePorParcial[cacheKey]) cachePorParcial[cacheKey] = {};
+            cachePorParcial[cacheKey].top5 = top5;
+
+            renderTop5(top5);
+        }
+
+        function renderTop5(top5) {
+            const rankingList = document.getElementById('top5Ranking');
+            rankingList.innerHTML = '';
+
+            top5.forEach((alumno, index) => {
+                const li = document.createElement('li');
+                li.className = 'ranking-item hover-scale';
+                li.innerHTML = `
+                <span class="ranking-position">${index + 1}</span>
+                <span class="ranking-name">${alumno.nombre}</span>
+                <span class="ranking-score">${alumno.calificacion.toFixed(1)}</span>
+            `;
+                rankingList.appendChild(li);
+            });
+        }
+
+        // Cargar configuración guardada
+        function loadSettings() {
+            const savedTheme = localStorage.getItem('selectedTheme') || 'cyberpunk';
+            const savedSound = localStorage.getItem('soundEnabled') !== 'false';
+
+            changeTheme(savedTheme);
+            soundEnabled = savedSound;
+            document.getElementById('soundIcon').textContent = soundEnabled ? 'volume_up' : 'volume_off';
+
+            createParticles();
+        }
+
+        function updateParcialTabs(parcial) {
+            const buttons = Array.from(document.querySelectorAll('button[onclick^="setParcial"]'));
+            buttons.forEach(b => b.classList.remove('active'));
+            const match = buttons.find(b => (b.getAttribute('onclick') || '').includes(`setParcial('${parcial}'`));
+            if (match) match.classList.add('active');
+
+            // Actualizar indicador con animación
+            const indicator = document.getElementById('partialIndicator');
+            if (indicator) {
+                indicator.classList.add('pulse-once');
+                indicator.textContent = `📊 ${parcial} Activo`;
+                indicator.style.opacity = '1';
+
+                setTimeout(() => {
+                    indicator.classList.remove('pulse-once');
+                }, 600);
+            }
+
+            // Actualizar información del sistema
+            updateSystemInfo();
+        }
+
+        function setParcial(p, btn) {
+            currentParcial = p;
+            updateParcialTabs(p);
+            playClickSound();
+
+            if (document.getElementById('card-result').style.display === 'block') buscar();
+        }
+
+        function togglePromedio() {
+            mostrarPromedio = !mostrarPromedio;
+            const btn = document.getElementById('btnPromedio');
+            btn.textContent = mostrarPromedio ? 'PROMEDIO: ACTIVADO' : 'PROMEDIO: DESACTIVADO';
+            btn.classList.toggle('text-[var(--neon-cyan)]', mostrarPromedio);
+            btn.classList.toggle('text-white/60', !mostrarPromedio);
+
+            // Si hay un alumno mostrado, actualizar la gráfica
+            const cardVisible = document.getElementById('card-result').style.display === 'block';
+            if (cardVisible && cacheData) {
+                const listaParcial = cacheData[currentParcial];
+                const idBusqueda = document.getElementById('searchId').value.trim();
+                const alumno = listaParcial.find(a => String(a.ID) === idBusqueda);
+                if (alumno) {
+                    updateChart(alumno);
+                }
+            }
+        }
+
+        function calcularPromedioGrupo(listaParcial) {
+            if (!listaParcial || listaParcial.length === 0) return null;
+
+            const componentes = ['Juego1', 'Serie1', 'Juego2', 'Serie2', 'Juego3', 'Serie3', 'Portfolio', 'RetoFinal'];
+            const promedios = {};
+
+            componentes.forEach(comp => {
+                const valores = listaParcial.map(a => parseFloat(a[comp]) || 0);
+                const suma = valores.reduce((acc, val) => acc + val, 0);
+                promedios[comp] = suma / valores.length;
+            });
+
+            return promedios;
+        }
+
+        async function buscar() {
+            const idBusqueda = document.getElementById('searchId').value.trim();
+            if (!idBusqueda) {
+                playErrorSound();
+                return alert("Ingresa una matrícula");
+            }
+
+            document.getElementById('loader').style.display = 'block';
+            updateConnectionStatus('loading');
+            playClickSound();
+
+            try {
+                // Intentar cargar desde cache primero
+                let fromCache = false;
+                if (!cacheData) {
+                    fromCache = loadCacheFromStorage();
+                }
+
+                // Si no hay cache válido, descargar de API
+                if (!cacheData) {
+                    const response = await fetch(URL_API);
+                    if (!response.ok) throw new Error('Error en API');
+
+                    cacheData = await response.json();
+                    lastDataUpdate = Date.now();
+                    saveCacheToStorage();
+                    fromCache = false;
+                }
+
+                updateConnectionStatus('online');
+                updateSystemInfo();
+
+                const listaParcial = cacheData[currentParcial];
+                const alumno = listaParcial.find(a => String(a.ID) === idBusqueda);
+
+                if (alumno) {
+                    // Calcular promedio del grupo
+                    promedioGrupo = calcularPromedioGrupo(listaParcial);
+
+                    // Actualizar ranking top 5
+                    updateTop5Ranking(listaParcial);
+
+                    // Calcular y mostrar posición en el grupo
+                    const rankInfo = calculateRank(idBusqueda, listaParcial);
+                    if (rankInfo) {
+                        const rankElement = document.getElementById('res-rank');
+                        rankElement.textContent = `Lugar ${rankInfo.rank} de ${rankInfo.total}`;
+                        rankElement.style.opacity = '1';
+                    }
+
+                    // Actualizar datos históricos
+                    updateHistoricalData(idBusqueda);
+
+                    // Generar alertas inteligentes tradicionales
+                    generateAlerts(idBusqueda);
+                
+                    // Generar alertas tempranas predictivas
+                    const earlyWarnings = generateEarlyWarnings(idBusqueda);
+                    if (earlyWarnings.length > 0) {
+                        displayEarlyWarnings(earlyWarnings);
+                    }
+                
+                    // Generar heat map de fortalezas (solo bases)
+                    generateHeatMap(alumno);
+                
+                    // Generar sistema de progreso del alumno
+                    generateStudentProgress(alumno);
+
+                    // Verificar logros
+                    checkAchievements(alumno);
+
+                    // Crear partículas de fondo solo si no existen
+                    if (!particulasFondoCreadas) {
+                        createParticles();
+                    }
+
+                    render(alumno);
+                    playSuccessSound();
+
+                    // Efectos visuales mejorados
+                    createBurstEffect();
+                    addScanAnimation();
+
+                    // Asegurar que la pestaña activa refleje el parcial actual
+                    updateParcialTabs(currentParcial);
+
+                    // Mostrar indicador si viene de cache
+                    if (fromCache) {
+                        setTimeout(() => {
+                            const indicator = document.getElementById('partialIndicator');
+                            indicator.textContent += ' (Cache)';
+                            setTimeout(() => {
+                                indicator.textContent = indicator.textContent.replace(' (Cache)', '');
+                            }, 2000);
+                        }, 500);
+                    }
+                } else {
+                    playErrorSound();
+                    alert("Matrícula no encontrada en " + currentParcial);
+                    document.getElementById('card-result').style.display = 'none';
+                    document.getElementById('alertSection').style.display = 'none';
+                }
+            } catch (e) {
+                playErrorSound();
+                updateConnectionStatus('offline');
+                console.error('Error:', e);
+                alert("Error de conexión: " + e.message);
+            } finally {
+                document.getElementById('loader').style.display = 'none';
+            }
+        }
+
+        function render(a) {
+            document.getElementById('card-result').style.display = 'block';
+            const calif = parseFloat(a.CalificacionFinal) || 0;
+
+            // Actualizar información del agente
+            document.getElementById('res-nombre').innerText = a["Nombre o nombres"];
+            document.getElementById('res-ap').innerText = `${a["Apellido Paterno"]} ${a["Apellido Materno"]}`;
+            document.getElementById('res-calif').innerText = calif.toFixed(1);
+            document.getElementById('res-calif-large').innerText = calif.toFixed(1);
+            document.getElementById('res-grupo').innerText = a.Grupo;
+            document.getElementById('res-id').innerText = a.ID;
+            document.getElementById('res-edad').innerText = a.Edad;
+
+            // Determinar nivel y colores
+            let status = "";
+            let colorStatus = "";
+            let levelBadge = "";
+            let healthPercentage = 0;
+
+            if (calif < 6) {
+                status = "RENDIMIENTO CRÍTICO";
+                colorStatus = "var(--neon-red)";
+                levelBadge = "NIVEL 0: INSUFICIENTE";
+                healthPercentage = Math.max(calif * 10, 10);
+            }
+            else if (calif < 7) {
+                status = "RENDIMIENTO BÁSICO";
+                colorStatus = "var(--neon-orange)";
+                levelBadge = "NIVEL 1: LA BASE";
+                healthPercentage = calif * 10;
+            }
+            else if (calif < 8) {
+                status = "MENTE ESTRATÉGICA";
+                colorStatus = "var(--neon-blue)";
+                levelBadge = "NIVEL 2: ORGANIZADOR";
+                healthPercentage = calif * 10;
+            }
+            else {
+                status = "GUERRERO ÉLITE";
+                colorStatus = "var(--neon-green)";
+                levelBadge = "NIVEL 3: EXCELENCIA";
+                healthPercentage = 100;
+            }
+
+            // Actualizar elementos con colores dinámicos
+            document.getElementById('res-status').innerText = status;
+            document.getElementById('res-status').style.color = colorStatus;
+            document.getElementById('res-calif').style.color = colorStatus;
+            document.getElementById('res-calif-large').style.color = colorStatus;
+            document.getElementById('res-level-badge').innerText = levelBadge;
+            document.getElementById('res-level-badge').style.backgroundColor = colorStatus;
+            document.getElementById('health-percentage').innerText = `${healthPercentage.toFixed(0)}%`;
+            document.getElementById('health-percentage').style.color = colorStatus;
+            document.getElementById('health-bar').style.width = `${healthPercentage}%`;
+            document.getElementById('health-bar').style.background = `linear-gradient(90deg, ${colorStatus} 0%, ${colorStatus}dd 100%)`;
+            document.getElementById('health-bar').style.boxShadow = `0 0 15px ${colorStatus}`;
+
+            updateChart(a);
+        }
+
+        function updateChart(a) {
+            const ctx = document.getElementById('myChart').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+
+            // Determinar color según nivel
+            const calif = parseFloat(a.CalificacionFinal) || 0;
+            let colorPrincipal, colorFondo;
+            if (calif < 6) {
+                colorPrincipal = 'var(--neon-red)';
+                colorFondo = 'rgba(255, 70, 85, 0.2)';
+            }
+            else if (calif < 7) {
+                colorPrincipal = 'var(--neon-orange)';
+                colorFondo = 'rgba(255, 149, 0, 0.2)';
+            }
+            else if (calif < 8) {
+                colorPrincipal = 'var(--neon-blue)';
+                colorFondo = 'rgba(0, 128, 255, 0.2)';
+            }
+            else {
+                colorPrincipal = 'var(--neon-green)';
+                colorFondo = 'rgba(12, 243, 169, 0.2)';
+            }
+
+            // Crear datasets para comparación de parciales
+            const datasets = [];
+            const parciales = ['Parcial 1', 'Parcial 2', 'Parcial 3'];
+            const coloresParciales = [
+                { border: 'rgba(0, 242, 255, 0.8)', fondo: 'rgba(0, 242, 255, 0.1)' },
+                { border: 'rgba(255, 149, 0, 0.8)', fondo: 'rgba(255, 149, 0, 0.1)' },
+                { border: 'rgba(12, 243, 169, 0.8)', fondo: 'rgba(12, 243, 169, 0.1)' }
+            ];
+
+            parciales.forEach((parcial, index) => {
+                if (!cacheData || !cacheData[parcial]) return;
+
+                const lista = cacheData[parcial];
+                const alumnoParcial = lista.find(al => String(al.ID) === a.ID);
+
+                if (alumnoParcial) {
+                    const valores = [
+                        alumnoParcial.Juego1 * 10,
+                        alumnoParcial.Serie1 * 10,
+                        alumnoParcial.Juego2 * 10,
+                        alumnoParcial.Serie2 * 10,
+                        alumnoParcial.Juego3 * 10,
+                        alumnoParcial.Serie3 * 10,
+                        alumnoParcial.Portfolio,
+                        alumnoParcial.RetoFinal / 10
+                    ];
+
+                    const color = coloresParciales[index];
+                    const isCurrentParcial = parcial === currentParcial;
+
+                    datasets.push({
+                        label: `P${index + 1} ${isCurrentParcial ? '(Actual)' : ''}`,
+                        data: valores,
+                        backgroundColor: color.fondo,
+                        borderColor: color.border,
+                        borderWidth: isCurrentParcial ? 3 : 2,
+                        pointBackgroundColor: color.border,
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: isCurrentParcial ? 2 : 1,
+                        pointRadius: isCurrentParcial ? 6 : 4,
+                        pointHoverRadius: isCurrentParcial ? 8 : 6,
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: color.border,
+                        pointHoverBorderWidth: isCurrentParcial ? 3 : 2
+                    });
+                }
+            });
+
+            // Agregar promedio del grupo si está activado y no hay comparación de parciales
+            if (mostrarPromedio && promedioGrupo && datasets.length === 1) {
+                const valoresPromedio = [
+                    promedioGrupo.Juego1 * 10,
+                    promedioGrupo.Serie1 * 10,
+                    promedioGrupo.Juego2 * 10,
+                    promedioGrupo.Serie2 * 10,
+                    promedioGrupo.Juego3 * 10,
+                    promedioGrupo.Serie3 * 10,
+                    promedioGrupo.Portfolio,
+                    promedioGrupo.RetoFinal / 10
+                ];
+
+                datasets.push({
+                    label: 'Promedio Grupo',
+                    data: valoresPromedio,
+                    backgroundColor: 'rgba(107, 114, 128, 0.1)',
+                    borderColor: '#6b7280',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    pointBackgroundColor: '#6b7280',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 1,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#6b7280'
+                });
+            }
+
+            // Si no hay datos, mostrar dataset vacío
+            if (datasets.length === 0) {
+                const valores = [a.Juego1 * 10, a.Serie1 * 10, a.Juego2 * 10, a.Serie2 * 10, a.Juego3 * 10, a.Serie3 * 10, a.Portfolio, a.RetoFinal / 10];
+                datasets.push({
+                    label: a["Nombre o nombres"] || 'Alumno',
+                    data: valores,
+                    backgroundColor: colorFondo,
+                    borderColor: colorPrincipal,
+                    borderWidth: 3,
+                    pointBackgroundColor: colorPrincipal,
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: colorPrincipal,
+                    pointHoverBorderWidth: 3
+                });
+            }
+
+            // Calcular valor máximo
+            const allValues = datasets.flatMap(d => d.data);
+            const valorMaximo = Math.max(...allValues, 10);
+
+            chartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Juego 1', 'Serie 1', 'Juego 2', 'Serie 2', 'Juego 3', 'Serie 3', 'Portafolio', 'Reto Final'],
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuart'
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: Math.ceil(valorMaximo),
+                            ticks: {
+                                stepSize: 2,
+                                font: {
+                                    family: 'Orbitron',
+                                    size: 10,
+                                    weight: 'bold'
+                                },
+                                color: 'rgba(0, 242, 255, 0.6)',
+                                backdropColor: 'transparent'
+                            },
+                            grid: {
+                                color: 'rgba(0, 242, 255, 0.1)',
+                                lineWidth: 1
+                            },
+                            pointLabels: {
+                                font: {
+                                    family: 'Orbitron',
+                                    size: 11,
+                                    weight: '600'
+                                },
+                                color: '#ffffff'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: datasets.length > 1,
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    family: 'Orbitron',
+                                    size: 10,
+                                    weight: '600'
+                                },
+                                color: 'rgba(255, 255, 255, 0.8)',
+                                usePointStyle: true,
+                                padding: 15
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(10, 14, 20, 0.95)',
+                            titleFont: {
+                                family: 'Orbitron',
+                                size: 12,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                family: 'Rajdhani',
+                                size: 11
+                            },
+                            padding: 12,
+                            cornerRadius: 4,
+                            displayColors: true,
+                            borderColor: 'var(--neon-cyan)',
+                            borderWidth: 1,
+                            callbacks: {
+                                title: function (context) {
+                                    return context[0].label;
+                                },
+                                label: function (context) {
+                                    const label = context.dataset.label;
+                                    const value = context.parsed.r.toFixed(1);
+                                    return `${label}: ${value}`;
+                                }
+                            }
+                        },
+                        datalabels: {
+                            display: function (context) {
+                                return context.datasetIndex === 0 && datasets.length === 1;
+                            },
+                            color: colorPrincipal,
+                            font: {
+                                family: 'Orbitron',
+                                weight: 'bold',
+                                size: 9
+                            },
+                            formatter: function (value, context) {
+                                return value.toFixed(1);
+                            },
+                            anchor: 'center',
+                            align: 'center',
+                            offset: 0
+                        }
+                    }
+                }
+            });
+        }
+
+        // Atajos de teclado para accesibilidad
+        document.addEventListener('keydown', function (event) {
+            // Atajos de número para parciales (1, 2, 3)
+            if (event.key >= '1' && event.key <= '3' && !event.target.matches('input')) {
+                const parcialMap = {
+                    '1': 'Parcial 1',
+                    '2': 'Parcial 2',
+                    '3': 'Parcial 3'
+                };
+                const parcial = parcialMap[event.key];
+                if (parcial) {
+                    setParcial(parcial, null);
+                    playClickSound();
+                }
+            }
+
+            // Ctrl+F o Cmd+F para focus en búsqueda
+            if ((event.ctrlKey || event.metaKey) && event.key === 'f') {
+                event.preventDefault();
+                document.getElementById('searchId').focus();
+                playClickSound();
+            }
+
+            // Escape para limpiar búsqueda
+            if (event.key === 'Escape') {
+                document.getElementById('searchId').value = '';
+                document.getElementById('card-result').style.display = 'none';
+                document.getElementById('alertSection').style.display = 'none';
+                playClickSound();
+            }
+
+            // Enter en cualquier lado para focus en búsqueda
+            if (event.key === 'Enter' && !event.target.matches('input') && !event.target.matches('button')) {
+                document.getElementById('searchId').focus();
+            }
+        });
+
+        // Inicialización mejorada
+        document.addEventListener('DOMContentLoaded', function () {
+            loadSettings();
+
+            // Intentar cargar cache al inicio
+            const cacheLoaded = loadCacheFromStorage();
+            if (!cacheLoaded) {
+                updateConnectionStatus('offline');
+            }
+
+            updateParcialTabs(currentParcial);
+
+            // Crear partículas de fondo al inicio
+            createParticles();
+
+            // Inicializar indicador de parcial
+            const indicator = document.getElementById('partialIndicator');
+            if (indicator) {
+                indicator.textContent = `📊 ${currentParcial} Activo`;
+                indicator.style.opacity = '1';
+            }
+
+            // Actualizar información del sistema
+            updateSystemInfo();
+
+            // Mostrar ayuda de atajos en consola
+            console.log('%c🎮 Atajos de teclado disponibles:', 'color: #00f2ff; font-weight: bold;');
+            console.log('1, 2, 3 - Cambiar de parcial');
+            console.log('Ctrl/Cmd + F - Focus en búsqueda');
+            console.log('Escape - Limpiar búsqueda');
+            console.log('Enter (fuera de input) - Focus en búsqueda');
+        });
+    </script>
+</body>
+
+</html>
